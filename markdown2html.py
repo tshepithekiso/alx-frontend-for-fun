@@ -63,7 +63,16 @@ def convert_markdown_to_html(input_file, output_file):
                     if not in_paragraph:
                         html_lines.append("<p>")
                         in_paragraph = True
-                    html_lines.append(line.rstrip().replace("\n", "<br/>"))
+
+                    # Parse bold and italic syntax
+                    parts = re.split(r'(\*\*|__)', line)
+                    for part in parts:
+                        if part == "**" or part == "__":
+                            html_lines.append("<b>" if part == "**" else "<em>")
+                        elif part.strip():
+                            html_lines.append(part.replace("\n", "<br/>"))
+                            if part == "**" or part == "__":
+                                html_lines.append("</b>" if part == "**" else "</em>")
 
         # Close any open list or paragraph at the end of the file
         if in_ol_list:
