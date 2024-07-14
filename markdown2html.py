@@ -68,30 +68,47 @@ def convert_markdown_to_html(input_file, output_file):
                         in_paragraph = True
 
                     # Parse bold and italic syntax
-                    for part in re.split(
-                            r'\[\[(.*?)\]\]|\(\((.*?)\)\)', line):
-                        if part.startswith("[[") and part.endswith("]]"):
-                            content = part[2:-2]
+                    i = 0
+                    while i < len(line):
+                        if line[i:i+2] == "**":
+                            if bold:
+                                html_lines.append("</b>")
+                                bold = False
+                            else:
+                                html_lines.append("<b>")
+                                bold = True
+                            i += 2
+                        elif line[i:i+2] == "__":
+                            if italic:
+                                html_lines.append("</em>")
+                                italic = False
+                            else:
+                                html_lines.append("<em>")
+                                italic = True
+                            i += 2
+                        elif line[i:i+2] == "[[" and "]]" in line[i:]:
+                            end_index = line.index("]]", i)
+                            content = line[i+2:end_index]
                             html_lines.append(
                                 hashlib.md5(content.encode()).hexdigest()
                             )
-                        elif part.startswith("((") and part.endswith("))"):
-                            content = part[2:-2]
+                            i = end_index + 2
+                        elif line[i:i+2] == "((" and "))" in line[i:]:
+                            end_index = line.index("))", i)
+                            content = line[i+2:end_index]
                             html_lines.append(
                                 re.sub(r'c', '', content, flags=re.IGNORECASE)
                             )
-                        elif part.strip():
-                            if bold:
-                                html_lines.append("<b>")
-                                bold = False
-                            if italic:
-                                html_lines.append("<em>")
-                                italic = False
-                            html_lines.append(part.replace("\n", "<br/>"))
-                            if bold:
-                                html_lines.append("</b>")
-                            if italic:
-                                html_lines.append("</em>")
+                            i = end_index + 2
+                        else:
+                            html_lines.append(line[i])
+                            i += 1
+
+                    if in_paragraph:
+                        html_lines.append("<br/>")
+                    else:
+                        html_lines.append("</p>")
+                        in_paragraph = False
 
         # Close any open list or paragraph at the end of the file
         if in_ol_list:
