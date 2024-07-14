@@ -17,6 +17,8 @@ def convert_markdown_to_html(input_file, output_file):
         in_ol_list = False
         in_ul_list = False
         in_paragraph = False
+        bold = False
+        italic = False
         for line in f:
             # Check for Markdown headings
             match = re.match(r"^(#+) (.*)$", line)
@@ -28,9 +30,7 @@ def convert_markdown_to_html(input_file, output_file):
 
                 heading_level = len(match.group(1))
                 heading_text = match.group(2)
-                html_lines.append(
-                    f"<h{heading_level}>{heading_text}</h{heading_level}>"
-                )
+                html_lines.append(f"<h{heading_level}>{heading_text}</h{heading_level}>")
             elif line.strip() == "":
                 # Close any open paragraph
                 if in_paragraph:
@@ -65,14 +65,24 @@ def convert_markdown_to_html(input_file, output_file):
                         in_paragraph = True
 
                     # Parse bold and italic syntax
-                    parts = re.split(r'(\*\*|__)', line)
-                    for part in parts:
+                    for part in re.split(r'(\*\*|__)', line):
                         if part == "**" or part == "__":
-                            html_lines.append("<b>" if part == "**" else "<em>")
+                            if part == "**":
+                                bold = not bold
+                            else:
+                                italic = not italic
                         elif part.strip():
+                            if bold:
+                                html_lines.append("<b>")
+                                bold = False
+                            if italic:
+                                html_lines.append("<em>")
+                                italic = False
                             html_lines.append(part.replace("\n", "<br/>"))
-                            if part == "**" or part == "__":
-                                html_lines.append("</b>" if part == "**" else "</em>")
+                            if bold:
+                                html_lines.append("</b>")
+                            if italic:
+                                html_lines.append("</em>")
 
         # Close any open list or paragraph at the end of the file
         if in_ol_list:
@@ -90,8 +100,7 @@ def convert_markdown_to_html(input_file, output_file):
 if __name__ == "__main__":
     # Check that the correct number of arguments were provided
     if len(sys.argv) != 3:
-        print("Usage: ./markdown2html.py README.md README.html",
-              file=sys.stderr)
+        print("Usage: ./markdown2html.py README.md README.html", file=sys.stderr)
         sys.exit(1)
 
     # Get the input and output file names from the command-line arguments
