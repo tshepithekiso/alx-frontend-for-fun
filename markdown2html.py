@@ -16,66 +16,42 @@ def convert_markdown_to_html(input_file, output_file):
         html_lines = []
         in_ol_list = False
         in_ul_list = False
-        in_paragraph = False
         for line in f:
             # Check for Markdown headings
             match = re.match(r"^(#+) (.*)$", line)
             if match:
-                # Close any open paragraph
-                if in_paragraph:
-                    html_lines.append("</p>")
-                    in_paragraph = False
-
                 heading_level = len(match.group(1))
                 heading_text = match.group(2)
                 html_lines.append(
-                    f"<h{heading_level}>{heading_text}</h{heading_level}>"
-                )
-            elif line.strip() == "":
-                # Close any open paragraph
-                if in_paragraph:
-                    html_lines.append("</p>")
-                    in_paragraph = False
+                        f"<h{heading_level}>{heading_text}</h{heading_level}>")
             else:
                 # Check for ordered list items (using *)
                 if line.startswith("* "):
-                    # Close any open paragraph
-                    if in_paragraph:
-                        html_lines.append("</p>")
-                        in_paragraph = False
-
-                    if not in_ol_list:
-                        html_lines.append("<ol>")
-                        in_ol_list = True
+                    if not in_ul_list:
+                        html_lines.append("<ul>")
+                        in_ul_list = True
                     html_lines.append(f"<li>{line[2:].strip()}</li>")
                 elif line.startswith("- "):
-                    # Close any open paragraph
-                    if in_paragraph:
-                        html_lines.append("</p>")
-                        in_paragraph = False
-
                     if not in_ul_list:
                         html_lines.append("<ul>")
                         in_ul_list = True
                     html_lines.append(f"<li>{line[2:].strip()}</li>")
                 else:
-                    # Start a new paragraph
-                    if not in_paragraph:
-                        html_lines.append("<p>")
-                        in_paragraph = True
-                    html_lines.append(line.rstrip().replace("\n", "<br/>"))
+                    if in_ul_list:
+                        html_lines.append("</ul>")
+                        in_ul_list = False
+                    html_lines.append(line.rstrip())
 
-        # Close any open list or paragraph at the end of the file
-        if in_ol_list:
-            html_lines.append("</ol>")
+        # Close any open list at the end of the file
         if in_ul_list:
             html_lines.append("</ul>")
-        if in_paragraph:
-            html_lines.append("</p>")
+        if in_ol_list:
+            html_lines.append("</ol>")
 
     # Write the HTML output to a file
     with open(output_file, "w", encoding="utf-8") as f:
-        f.write("\n".join(html_lines))
+        for line in html_lines:
+            f.write(line + "\n")
 
 
 if __name__ == "__main__":
