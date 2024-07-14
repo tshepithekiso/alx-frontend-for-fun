@@ -1,116 +1,131 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
+"""
+A script that converts Markdown to HTML.
+"""
 
 import sys
 import os
+import re
 import hashlib
 
 
-def convert_md5(content):
-    return hashlib.md5(content.encode()).hexdigest()
+def convert_markdown_to_html(input_file, output_file):
+    """
+    Converts a Markdown file to HTML and writes the output to a file.
+    """
+    with open(input_file, encoding="utf-8") as f:
+        html_lines = []
+        in_ol_list = False
+        in_ul_list = False
+        in_paragraph = False
+        bold = False
+        italic = False
+        for line in f:
+            # Check for Markdown headings
+            match = re.match(r"^(#+) (.*)$", line)
+            if match:
+                # Close any open paragraph
+                if in_paragraph:
+                    html_lines.append("</p>")
+                    in_paragraph = False
 
+                heading_level = len(match.group(1))
+                heading_text = match.group(2)
+                html_lines.append(
+                    f"<h{heading_level}>{heading_text}</h{heading_level}>"
+                )
+            elif line.strip() == "":
+                # Close any open paragraph
+                if in_paragraph:
+                    html_lines.append("</p>")
+                    in_paragraph = False
+            else:
+                # Check for ordered list items (using *)
+                if line.startswith("* "):
+                    # Close any open paragraph
+                    if in_paragraph:
+                        html_lines.append("</p>")
+                        in_paragraph = False
 
-def remove_c(content):
-    return content.replace('c', '').replace('C', '')
+                    if not in_ol_list:
+                        html_lines.append("<ol>")
+                        in_ol_list = True
+                    html_lines.append(f"<li>{line[2:].strip()}</li>")
+                elif line.startswith("- "):
+                    # Close any open paragraph
+                    if in_paragraph:
+                        html_lines.append("</p>")
+                        in_paragraph = False
 
+                    if not in_ul_list:
+                        html_lines.append("<ul>")
+                        in_ul_list = True
+                    html_lines.append(f"<li>{line[2:].strip()}</li>")
+                else:
+                    # Start a new paragraph
+                    if not in_paragraph:
+                        html_lines.append("<p>")
+                        in_paragraph = True
 
-def parse_markdown(file_content):
-    lines = file_content.split('\n')
-    html_lines = []
-    in_list = False
-    in_olist = False
+                    # Parse bold and italic syntax
+                    for part in re.split(
+                            r'\[\[(.*?)\]\]|\(\((.*?)\)\)', line):
+                        if part.startswith("[[") and part.endswith("]]"):
+                            content = part[2:-2]
+                            html_lines.append(
+                                hashlib.md5(content.encode()).hexdigest()
+                            )
+                        elif part.startswith("((") and part.endswith("))"):
+                            content = part[2:-2]
+                            html_lines.append(
+                                re.sub(r'c', '', content, flags=re.IGNORECASE)
+                            )
+                        elif part.strip():
+                            if bold:
+                                html_lines.append("<b>")
+                                bold = False
+                            if italic:
+                                html_lines.append("<em>")
+                                italic = False
+                            html_lines.append(part.replace("\n", "<br/>"))
+                            if bold:
+                                html_lines.append("</b>")
+                            if italic:
+                                html_lines.append("</em>")
 
-    for line in lines:
-        line = line.rstrip()
+        # Close any open list or paragraph at the end of the file
+        if in_ol_list:
+            html_lines.append("</ol>")
+        if in_ul_list:
+            html_lines.append("</ul>")
+        if in_paragraph:
+            html_lines.append("</p>")
 
-        if line.startswith('#'):
-            header_level = len(line.split(' ')[0])
-            header_content = line[header_level + 1:]
-            html_lines.append(
-                f'<h{header_level}>{header_content}</h{header_level}>'
-            )
-
-        elif line.startswith('- '):
-            if not in_list:
-                html_lines.append('<ul>')
-                in_list = True
-            list_item = line[2:]
-            list_item = parse_inline_formatting(list_item)
-            html_lines.append(f'<li>{list_item}</li>')
-
-        elif line.startswith('* '):
-            if not in_olist:
-                html_lines.append('<ol>')
-                in_olist = True
-            list_item = line[2:]
-            list_item = parse_inline_formatting(list_item)
-            html_lines.append(f'<li>{list_item}</li>')
-
-        elif line == '':
-            if in_list:
-                html_lines.append('</ul>')
-                in_list = False
-            if in_olist:
-                html_lines.append('</ol>')
-                in_olist = False
-
-        else:
-            if in_list:
-                html_lines.append('</ul>')
-                in_list = False
-            if in_olist:
-                html_lines.append('</ol>')
-                in_olist = False
-
-            line = parse_inline_formatting(line)
-            html_lines.append(f'<p>{line}</p>')
-
-    if in_list:
-        html_lines.append('</ul>')
-    if in_olist:
-        html_lines.append('</ol>')
-
-    return '\n'.join(html_lines)
-
-
-def parse_inline_formatting(text):
-    text = text.replace('**', '<b>').replace('<b>', '</b>', 1)
-    text = text.replace('__', '<em>').replace('<em>', '</em>', 1)
-    if '[[' in text and ']]' in text:
-        start = text.find('[[') + 2
-        end = text.find(']]')
-        content = text[start:end]
-        md5_content = convert_md5(content)
-        text = text.replace(f'[[{content}]]', md5_content)
-    if '((' in text and '))' in text:
-        start = text.find('((') + 2
-        end = text.find('))')
-        content = text[start:end]
-        new_content = remove_c(content)
-        text = text.replace(f'(({content}))', new_content)
-    return text
+    # Write the HTML output to a file
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write("\n".join(html_lines))
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
+    # Check that the correct number of arguments were provided
+    if len(sys.argv) != 3:
         print(
             "Usage: ./markdown2html.py README.md README.html",
             file=sys.stderr
         )
         sys.exit(1)
 
-    markdown_file = sys.argv[1]
-    html_file = sys.argv[2]
+    # Get the input and output file names from the command-line arguments
+    input_file = sys.argv[1]
+    output_file = sys.argv[2]
 
-    if not os.path.exists(markdown_file):
-        print(f"Missing {markdown_file}", file=sys.stderr)
+    # Check that the Markdown file exists and is a file
+    if not os.path.isfile(input_file):
+        print(f"Missing {input_file}", file=sys.stderr)
         sys.exit(1)
 
-    with open(markdown_file, 'r') as f:
-        file_content = f.read()
+    # Convert the Markdown file to HTML and write the output to a file
+    convert_markdown_to_html(input_file, output_file)
 
-    html_content = parse_markdown(file_content)
-
-    with open(html_file, 'w') as f:
-        f.write(html_content)
-
+    # Exit with a successful status code
     sys.exit(0)
