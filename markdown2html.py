@@ -31,9 +31,7 @@ def convert_markdown_to_html(input_file, output_file):
 
                 heading_level = len(match.group(1))
                 heading_text = match.group(2)
-                html_lines.append(
-                    f"<h{heading_level}>{heading_text}</h{heading_level}>"
-                )
+                html_lines.append(f"<h{heading_level}>{heading_text}</h{heading_level}>")
             elif line.strip() == "":
                 # Close any open paragraph
                 if in_paragraph:
