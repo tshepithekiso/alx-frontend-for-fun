@@ -6,6 +6,7 @@ A script that converts Markdown to HTML.
 import sys
 import os
 import re
+import hashlib
 
 
 def convert_markdown_to_html(input_file, output_file):
@@ -30,7 +31,9 @@ def convert_markdown_to_html(input_file, output_file):
 
                 heading_level = len(match.group(1))
                 heading_text = match.group(2)
-                html_lines.append(f"<h{heading_level}>{heading_text}</h{heading_level}>")
+                html_lines.append(
+                    f"<h{heading_level}>{heading_text}</h{heading_level}>"
+                )
             elif line.strip() == "":
                 # Close any open paragraph
                 if in_paragraph:
@@ -65,12 +68,13 @@ def convert_markdown_to_html(input_file, output_file):
                         in_paragraph = True
 
                     # Parse bold and italic syntax
-                    for part in re.split(r'(\*\*|__)', line):
-                        if part == "**" or part == "__":
-                            if part == "**":
-                                bold = not bold
-                            else:
-                                italic = not italic
+                    for part in re.split(r'\[\[(.*?)\]\]|\(\((.*?)\)\)', line):
+                        if part.startswith("[[") and part.endswith("]]"):
+                            content = part[2:-2]
+                            html_lines.append(hashlib.md5(content.encode()).hexdigest())
+                        elif part.startswith("((") and part.endswith("))"):
+                            content = part[2:-2]
+                            html_lines.append(re.sub(r'c', '', content, flags=re.IGNORECASE))
                         elif part.strip():
                             if bold:
                                 html_lines.append("<b>")
