@@ -23,13 +23,14 @@ def convert_markdown_to_html(input_file, output_file):
                 heading_level = len(match.group(1))
                 heading_text = match.group(2)
                 html_lines.append(
-                        f"<h{heading_level}>{heading_text}</h{heading_level}>")
+                    f"<h{heading_level}>{heading_text}</h{heading_level}>"
+                )
             else:
                 # Check for ordered list items (using *)
                 if line.startswith("* "):
-                    if not in_ul_list:
-                        html_lines.append("<ul>")
-                        in_ul_list = True
+                    if not in_ol_list:
+                        html_lines.append("<ol>")
+                        in_ol_list = True
                     html_lines.append(f"<li>{line[2:].strip()}</li>")
                 elif line.startswith("- "):
                     if not in_ul_list:
@@ -37,21 +38,23 @@ def convert_markdown_to_html(input_file, output_file):
                         in_ul_list = True
                     html_lines.append(f"<li>{line[2:].strip()}</li>")
                 else:
+                    if in_ol_list:
+                        html_lines.append("</ol>")
+                        in_ol_list = False
                     if in_ul_list:
                         html_lines.append("</ul>")
                         in_ul_list = False
                     html_lines.append(line.rstrip())
 
         # Close any open list at the end of the file
-        if in_ul_list:
-            html_lines.append("</ul>")
         if in_ol_list:
             html_lines.append("</ol>")
+        if in_ul_list:
+            html_lines.append("</ul>")
 
     # Write the HTML output to a file
     with open(output_file, "w", encoding="utf-8") as f:
-        for line in html_lines:
-            f.write(line + "\n")
+        f.write("\n".join(html_lines))
 
 
 if __name__ == "__main__":
