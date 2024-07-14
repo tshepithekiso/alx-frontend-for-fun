@@ -15,6 +15,7 @@ def convert_markdown_to_html(input_file, output_file):
     with open(input_file, encoding="utf-8") as f:
         html_lines = []
         in_ol_list = False
+        in_ul_list = False
         for line in f:
             # Check for Markdown headings
             match = re.match(r"^(#+) (.*)$", line)
@@ -26,17 +27,24 @@ def convert_markdown_to_html(input_file, output_file):
             else:
                 # Check for ordered list items (using *)
                 if line.startswith("* "):
-                    if not in_ol_list:
-                        html_lines.append("<ol>")
-                        in_ol_list = True
+                    if not in_ul_list:
+                        html_lines.append("<ul>")
+                        in_ul_list = True
+                    html_lines.append(f"<li>{line[2:].strip()}</li>")
+                elif line.startswith("- "):
+                    if not in_ul_list:
+                        html_lines.append("<ul>")
+                        in_ul_list = True
                     html_lines.append(f"<li>{line[2:].strip()}</li>")
                 else:
-                    if in_ol_list:
-                        html_lines.append("</ol>")
-                        in_ol_list = False
+                    if in_ul_list:
+                        html_lines.append("</ul>")
+                        in_ul_list = False
                     html_lines.append(line.rstrip())
 
         # Close any open list at the end of the file
+        if in_ul_list:
+            html_lines.append("</ul>")
         if in_ol_list:
             html_lines.append("</ol>")
 
