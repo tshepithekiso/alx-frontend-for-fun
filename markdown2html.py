@@ -1,12 +1,10 @@
 #!/usr/bin/python3
-"""
-A script that converts Markdown to HTML.
-"""
+"""Markdown to HTML"""
+
 
 import sys
 import os
 import re
-import hashlib
 
 
 def convert_markdown_to_html(input_file, output_file):
@@ -16,120 +14,42 @@ def convert_markdown_to_html(input_file, output_file):
     with open(input_file, encoding="utf-8") as f:
         html_lines = []
         in_ol_list = False
-        in_ul_list = False
-        in_paragraph = False
-        bold = False
-        italic = False
         for line in f:
             # Check for Markdown headings
             match = re.match(r"^(#+) (.*)$", line)
             if match:
-                # Close any open paragraph
-                if in_paragraph:
-                    html_lines.append("</p>")
-                    in_paragraph = False
-
                 heading_level = len(match.group(1))
                 heading_text = match.group(2)
                 html_lines.append(
-                    f"<h{heading_level}>{heading_text}</h{heading_level}>"
-                )
-            elif line.strip() == "":
-                # Close any open paragraph
-                if in_paragraph:
-                    html_lines.append("</p>")
-                    in_paragraph = False
+                        f"<h{heading_level}>{heading_text}</h{heading_level}>")
             else:
                 # Check for ordered list items (using *)
                 if line.startswith("* "):
-                    # Close any open paragraph
-                    if in_paragraph:
-                        html_lines.append("</p>")
-                        in_paragraph = False
-
                     if not in_ol_list:
                         html_lines.append("<ol>")
                         in_ol_list = True
                     html_lines.append(f"<li>{line[2:].strip()}</li>")
-                elif line.startswith("- "):
-                    # Close any open paragraph
-                    if in_paragraph:
-                        html_lines.append("</p>")
-                        in_paragraph = False
-
-                    if not in_ul_list:
-                        html_lines.append("<ul>")
-                        in_ul_list = True
-                    html_lines.append(f"<li>{line[2:].strip()}</li>")
                 else:
-                    # Start a new paragraph
-                    if not in_paragraph:
-                        html_lines.append("<p>")
-                        in_paragraph = True
+                    if in_ol_list:
+                        html_lines.append("</ol>")
+                        in_ol_list = False
+                    html_lines.append(line.rstrip())
 
-                    # Parse bold and italic syntax
-                    i = 0
-                    while i < len(line):
-                        if line[i:i+2] == "**":
-                            if bold:
-                                html_lines.append("</b>")
-                                bold = False
-                            else:
-                                html_lines.append("<b>")
-                                bold = True
-                            i += 2
-                        elif line[i:i+2] == "__":
-                            if italic:
-                                html_lines.append("</em>")
-                                italic = False
-                            else:
-                                html_lines.append("<em>")
-                                italic = True
-                            i += 2
-                        elif line[i:i+2] == "[[" and "]]" in line[i:]:
-                            end_index = line.index("]]", i)
-                            content = line[i+2:end_index]
-                            html_lines.append(
-                                hashlib.md5(content.encode()).hexdigest()
-                            )
-                            i = end_index + 2
-                        elif line[i:i+2] == "((" and "))" in line[i:]:
-                            end_index = line.index("))", i)
-                            content = line[i+2:end_index]
-                            html_lines.append(
-                                re.sub(r'c', '', content, flags=re.IGNORECASE)
-                            )
-                            i = end_index + 2
-                        else:
-                            html_lines.append(line[i])
-                            i += 1
-
-                    if in_paragraph:
-                        html_lines.append("<br/>")
-                    else:
-                        html_lines.append("</p>")
-                        in_paragraph = False
-
-        # Close any open list or paragraph at the end of the file
+        # Close any open list at the end of the file
         if in_ol_list:
             html_lines.append("</ol>")
-        if in_ul_list:
-            html_lines.append("</ul>")
-        if in_paragraph:
-            html_lines.append("</p>")
 
     # Write the HTML output to a file
     with open(output_file, "w", encoding="utf-8") as f:
-        f.write("\n".join(html_lines))
+        for line in html_lines:
+            f.write(line + "\n")
 
 
 if __name__ == "__main__":
     # Check that the correct number of arguments were provided
     if len(sys.argv) != 3:
-        print(
-            "Usage: ./markdown2html.py README.md README.html",
-            file=sys.stderr
-        )
+        print("Usage: ./markdown2html.py README.md README.html",
+              file=sys.stderr)
         sys.exit(1)
 
     # Get the input and output file names from the command-line arguments
