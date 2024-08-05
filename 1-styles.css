@@ -1,0 +1,26 @@
+/* 1-styles.css */
+
+/* Remove the default underline from the link */
+a {
+    text-decoration: none; /* Hide the underline */
+    position: relative; /* Position relative for pseudo-element */
+}
+
+/* Create a pseudo-element for the underline effect */
+a::after {
+    content: ''; /* Create an empty content */
+    display: block; /* Make it a block element */
+    width: 100%; /* Full width of the link */
+    height: 2px; /* Height of the underline */
+    background-color: black; /* Color of the underline */
+    position: absolute; /* Position it absolutely */
+    bottom: 0; /* Align it to the bottom of the link */
+    left: 0; /* Align it to the left */
+    transform: scaleX(0); /* Start with no width (hidden) */
+    transition: transform 0.3s ease; /* Smooth transition for the scaling */
+}
+
+/* Show the underline on hover */
+a:hover::after {
+    transform: scaleX(1); /* Scale to full width on hover */
+}
