@@ -1,0 +1,39 @@
+/* 0-styles.css */
+
+/* General styles for the list */
+ul {
+    list-style-type: none; /* Remove default list styling */
+    padding: 0; /* Remove default padding */
+}
+
+li {
+    position: relative; /* Position relative for absolute positioning of icons */
+    padding-left: 120px; /* Space for the icon */
+    margin: 10px 0; /* Add some vertical spacing */
+    font-size: 18px; /* Increase font size for better readability */
+}
+
+/* Icon styles */
+.icon {
+    position: absolute; /* Position icons absolutely within the list item */
+    left: 0; /* Align to the left */
+    top: 50%; /* Center vertically */
+    transform: translateY(-50%); /* Adjust for vertical centering */
+    width: 100px; /* Width of each icon */
+    height: 100px; /* Height of each icon */
+    background-image: url('0-sprite.png'); /* Set the sprite image as background */
+    background-size: 300px 100px; /* Size of the entire sprite */
+}
+
+/* Specific icon classes */
+.i-html {
+    background-position: 0 0; /* Position for HTML icon */
+}
+
+.i-css {
+    background-position: -100px 0; /* Position for CSS icon */
+}
+
+.i-js {
+    background-position: -200px 0; /* Position for JavaScript icon */
+}
