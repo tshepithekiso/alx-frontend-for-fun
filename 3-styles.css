@@ -1,0 +1,81 @@
+/* 3-styles.css */
+
+/* Reset default styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif; /* Set a default font */
+}
+
+/* Style the menu */
+.menu {
+    position: relative; /* Position relative for absolute child elements */
+    background-color: #333; /* Background color for the menu */
+    overflow: hidden; /* Hide overflow for animation */
+}
+
+/* Hide the checkbox */
+.menu-open {
+    display: none; /* Hide the checkbox */
+}
+
+/* Style the menu open button */
+.menu-open-button {
+    display: flex; /* Use flexbox for alignment */
+    flex-direction: column; /* Stack lines vertically */
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
+    width: 40px; /* Width of the button */
+    height: 40px; /* Height of the button */
+    cursor: pointer; /* Change cursor to pointer */
+    margin: 10px; /* Add margin around the button */
+}
+
+/* Style the lines of the button */
+.menu-line {
+    width: 100%; /* Full width */
+    height: 4px; /* Height of the lines */
+    background-color: white; /* Color of the lines */
+    margin: 3px 0; /* Space between lines */
+    transition: all 0.3s ease; /* Smooth transition for animations */
+}
+
+/* Menu items */
+.menu-item {
+    display: block; /* Make items block elements */
+    color: white; /* Text color */
+    text-decoration: none; /* Remove underline */
+    padding: 10px; /* Padding for items */
+    opacity: 0; /* Start with hidden items */
+    transform: translateY(-10px); /* Move items up slightly */
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition for opacity and position */
+}
+
+/* Show menu items when the menu is open */
+.menu-open:checked ~ .menu-item {
+    opacity: 1; /* Show items */
+    transform: translateY(0); /* Move items to their original position */
+}
+
+/* Change the appearance of the button when checked */
+.menu-open:checked + .menu-open-button .menu-line-1 {
+    transform: rotate(45deg) translate(5px, 5px); /* Rotate the first line */
+}
+
+.menu-open:checked + .menu-open-button .menu-line-2 {
+    opacity: 0; /* Hide the second line */
+}
+
+.menu-open:checked + .menu-open-button .menu-line-3 {
+    transform: rotate(-45deg) translate(5px, -5px); /* Rotate the third line */
+}
+
+/* Media query for responsive design */
+@media (max-width: 600px) {
+    .menu {
+        width: 100%; /* Full width for smaller screens */
+    }
+
+    .menu-item {
+        text-align: center; /* Center align items */
+    }
+}
