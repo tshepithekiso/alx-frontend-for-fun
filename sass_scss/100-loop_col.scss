@@ -1,0 +1,15 @@
+// Loop through column numbers from 1 to 4
+@for $i from 1 through 4 {
+  .col-#{$i} {
+    // Define widths based on the column number
+    @if $i == 1 {
+      width: 100%;
+    } @else if $i == 2 {
+      width: 50%;
+    } @else if $i == 3 {
+      width: 33.3333333333%;
+    } @else if $i == 4 {
+      width: 25%;
+    }
+  }
+}
