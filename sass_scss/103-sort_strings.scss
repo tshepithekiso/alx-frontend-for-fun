@@ -1,8 +1,7 @@
-$list_to_sort: john, anna, zoe, kim, felicia, carrie;
+/* Write a Sass file that sorts the variable 
+$list_to_sort and prints the sorted list in the debug output.
+ */
 
-// Sort the list
-$list_sorted: sort($list_to_sort);
+@import '103-sort_list';
 
-// Print the sorted list using debug
-@debug $list_sorted;
-
+@debug $list_to_sort;
