@@ -1,7 +1,9 @@
+//No margin or padding in body tags.//
 body {
   margin: 0;
   padding: 0;
 
+  //Margin of 10px to all p tags inside body tags.//
   p {
     margin: 10px;
   }
