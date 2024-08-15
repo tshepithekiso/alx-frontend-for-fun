@@ -1,0 +1,40 @@
+// Define the list to sort
+$list_to_sort: john anna zoe kim felicia carrie;
+
+// Function to sort a list
+@function sort-list($list) {
+  $sorted-list: ();
+
+  // Loop through each item in the list
+  @each $item in $list {
+    $inserted: false;
+
+    // Create a new sorted list with the current item inserted
+    $new-sorted-list: ();
+
+    // Loop through the sorted list to find the correct position
+    @for $i from 1 through length($sorted-list) {
+      // If the current item is less than the sorted list item, append the sorted list item to the new list
+      @if $item >= nth($sorted-list, $i) {
+        $new-sorted-list: append($new-sorted-list, nth($sorted-list, $i), comma);
+      } @else if not $inserted {
+        // If the current item is less than the sorted list item and not inserted yet, append the current item and set $inserted to true
+        $new-sorted-list: append($new-sorted-list, $item, comma);
+        $inserted: true;
+      }
+    }
+
+    // If the item was not inserted, append it to the end of the new list
+    @if not $inserted {
+      $new-sorted-list: append($new-sorted-list, $item, comma);
+    }
+
+    // Update the $sorted-list with the new sorted list
+    $sorted-list: $new-sorted-list;
+  }
+
+  @return $sorted-list;
+}
+
+// Sort the list and print the sorted list in the debug output
+@debug sort-list($list_to_sort);
