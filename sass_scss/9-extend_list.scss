@@ -1,0 +1,15 @@
+// Define the .info class with a font size
+.info {
+  font-size: 12px;
+}
+
+// Extend the .info class for .success and .warning classes
+.success {
+  @extend .info; // Inherit styles from .info
+  color: #00FF00; // Text color for .success
+}
+
+.warning {
+  @extend .info; // Inherit styles from .info
+  color: #FF0000; // Text color for .warning
+}
