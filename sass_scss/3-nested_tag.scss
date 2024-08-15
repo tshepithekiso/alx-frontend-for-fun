@@ -1,9 +1,10 @@
-//No margin or padding in body tags.//
-body {
-  margin: 0;
-  padding: 0;
+/* 
+Using the nesting for styling
+ */
 
-  //Margin of 10px to all p tags inside body tags.//
+body {
+  margin: 0px;
+  padding: 0px;
   p {
     margin: 10px;
   }
