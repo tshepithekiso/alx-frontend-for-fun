@@ -1,10 +1,10 @@
-/* Nested hover
-change button color on hover */
-
+// Assign text color #FF0000 to button tags
 button {
-    color: #FF0000;
+  color: #FF0000;
 
-    &:hover {
-        color: #00FF00;
-    }
+  // When the user hovers over button tags, change the text color to #00FF00
+  &:hover {
+    color: #00FF00;
+  }
 }
+
